@@ -6,21 +6,18 @@
     <link rel="shortcut icon" type="image/x-icon" href="Cric stream Favicon.jpg">
     <title>Premium IPTV Player</title>
     <style>
-        /* ডার্ক থিম ইন্টারফেস */
         body {
             margin: 0;
             padding: 0;
-            background-color: #0f0f0f; /* Pure Dark Background */
+            background-color: #0f0f0f;
             color: #ffffff;
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             overflow-x: hidden;
         }
 
-        /* প্লেয়ার কন্টেইনার */
         #player-container {
             width: 100%;
             background: #000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
         #jwplayerDiv {
@@ -28,7 +25,6 @@
             aspect-ratio: 16 / 9;
         }
 
-        /* টেলিগ্রাম বাটন প্রফেশনাল ডিজাইন */
         .action-bar {
             background-color: #1a1a1a;
             text-align: center;
@@ -55,7 +51,12 @@
             box-shadow: 0 5px 15px rgba(0, 136, 204, 0.4);
         }
 
-        /* বিজ্ঞাপন সেকশন (Sticky Bottom) */
+        .counter-section {
+            padding: 10px;
+            background: #121212;
+            font-size: 14px;
+        }
+
         .ad-wrapper {
             position: fixed;
             bottom: 0;
@@ -66,18 +67,6 @@
             padding: 5px 0;
             z-index: 9999;
             text-align: center;
-        }
-
-        /* ইউজার কাউন্টার স্টাইল */
-        .counter-section {
-            padding: 10px;
-            background: #121212;
-            font-size: 14px;
-        }
-
-        /* প্লেয়ারের স্কিন ডার্ক করা */
-        .jw-skin-glow .jw-background-color {
-            background-color: rgba(0, 0, 0, 0.8) !important;
         }
     </style>
     <script src="https://cdn.jwplayer.com/libraries/SAHhwvZq.js"></script>
@@ -98,7 +87,7 @@
         <center>
             <script type="text/javascript" src="//widget.supercounters.com/ssl/online_t.js"></script>
             <script type="text/javascript">
-                sc_online_t(1707487, "Users Online", "ffffff"); /* কাউন্টার টেক্সট সাদা করা হয়েছে */
+                sc_online_t(1707487, "Users Online", "ffffff");
             </script>
         </center>
     </div>
@@ -123,24 +112,38 @@
                 autostart: true,
                 mute: false,
                 skin: {
-                    name: "glow", // ডার্ক থিম স্কিন
+                    name: "glow",
                     active: "#0074d9",
                     inactive: "#ffffff",
                     background: "#000000"
                 },
                 type: "hls",
-                preload: "auto",
-                cast: {
-                    appid: "CC1AD845"
+                preload: "auto"
+            });
+
+            // ফুল-স্ক্রিন রোটেট কন্ট্রোল
+            playerInstance.on('fullscreen', function(event) {
+                if (event.fullscreen) {
+                    // ল্যান্ডস্কেপ মোড করার চেষ্টা করবে
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('landscape').catch(err => {
+                            console.log("Orientation lock failed: ", err);
+                        });
+                    }
+                } else {
+                    // ফুল-স্ক্রিন থেকে বের হলে আনলক করবে
+                    if (screen.orientation && screen.orientation.unlock) {
+                        screen.orientation.unlock();
+                    }
                 }
             });
 
             playerInstance.on('error', function(error) {
-                document.getElementById('jwplayerDiv').innerHTML = `<div style="padding:20px; text-align:center;">Stream Loading Failed. Please Refresh.</div>`;
+                document.getElementById('jwplayerDiv').innerHTML = `<div style="padding:40px; text-align:center; background:#000;">প্লেয়ার লোড হতে সমস্যা হচ্ছে। দয়া করে পেজটি রিফ্রেশ করুন।</div>`;
             });
         }
 
-        // Security Scripts
+        // Security
         document.addEventListener("contextmenu", e => e.preventDefault());
         document.addEventListener("keydown", e => {
             if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) || (e.ctrlKey && e.key === "U")) {
