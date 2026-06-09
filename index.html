@@ -1,161 +1,261 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" type="image/x-icon" href="Cric stream Favicon.jpg">
-    <title>Premium IPTV Player</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #0f0f0f;
-            color: #ffffff;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            overflow-x: hidden;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RS Live TV Player</title>
 
-        #player-container {
-            width: 100%;
-            background: #000;
-        }
+<link rel="icon" href="favicon.ico">
 
-        #jwplayerDiv {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-        }
+<script src="https://cdn.jwplayer.com/libraries/SAHhwvZq.js"></script>
 
-        .action-bar {
-            background-color: #1a1a1a;
-            text-align: center;
-            padding: 15px;
-            border-bottom: 1px solid #333;
-        }
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
 
-        #joinTelegramButton {
-            background: linear-gradient(135deg, #0088cc, #0074d9);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
+body{
+background:#000;
+font-family:Arial,sans-serif;
+color:#fff;
+overflow-x:hidden;
+}
 
-        #joinTelegramButton:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 136, 204, 0.4);
-        }
+#player-container{
+position:relative;
+width:100%;
+background:#000;
+}
 
-        .counter-section {
-            padding: 10px;
-            background: #121212;
-            font-size: 14px;
-        }
+#jwplayerDiv{
+width:100%;
+}
 
-        .ad-wrapper {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(15, 15, 15, 0.95);
-            border-top: 1px solid #333;
-            padding: 5px 0;
-            z-index: 9999;
-            text-align: center;
-        }
-    </style>
-    <script src="https://cdn.jwplayer.com/libraries/SAHhwvZq.js"></script>
+.loader{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+z-index:999;
+width:50px;
+height:50px;
+border:5px solid rgba(255,255,255,.2);
+border-top:5px solid #00aaff;
+border-radius:50%;
+animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+100%{
+transform:translate(-50%,-50%) rotate(360deg);
+}
+}
+
+.watermark{
+position:absolute;
+top:10px;
+right:10px;
+background:rgba(0,0,0,.6);
+padding:6px 12px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+z-index:999;
+}
+
+.live{
+position:absolute;
+top:10px;
+left:10px;
+background:red;
+padding:6px 12px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+z-index:999;
+animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+50%{
+opacity:.5;
+}
+}
+
+.telegram{
+background:#111;
+padding:15px;
+text-align:center;
+}
+
+.telegram a{
+display:inline-block;
+padding:12px 25px;
+background:#0088cc;
+color:#fff;
+text-decoration:none;
+border-radius:30px;
+font-weight:bold;
+}
+
+.telegram a:hover{
+opacity:.9;
+}
+
+.counter{
+padding:10px;
+background:#111;
+text-align:center;
+}
+
+.error-box{
+padding:40px;
+text-align:center;
+font-size:18px;
+color:#fff;
+}
+
+.ad-wrapper{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+background:#111;
+border-top:1px solid #333;
+text-align:center;
+z-index:9999;
+}
+
+body{
+padding-bottom:70px;
+}
+</style>
 </head>
 <body>
 
-    <div id="player-container">
-        <div id="jwplayerDiv"></div>
-    </div>
+<div id="player-container">
 
-    <div class="action-bar">
-        <a href="https://t.me/rslivetv" target="_blank" style="text-decoration: none;">
-            <button id="joinTelegramButton">JOIN OUR TELEGRAM CHANNEL</button>
-        </a>
-    </div>
+<div class="loader" id="loader"></div>
 
-    <div class="counter-section">
-        <center>
-            <script type="text/javascript" src="//widget.supercounters.com/ssl/online_t.js"></script>
-            <script type="text/javascript">
-                sc_online_t(1707487, "Users Online", "ffffff");
-            </script>
-        </center>
-    </div>
+<div class="live">
+🔴 LIVE
+</div>
 
-    <script>
-        function getQueryParam(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
-        }
+<div class="watermark">
+RS LIVE TV
+</div>
 
-        const hlsStreamUrl = getQueryParam("file");
+<div id="jwplayerDiv"></div>
 
-        if (!hlsStreamUrl) {
-            console.error("No HLS stream URL provided.");
-        } else {
-            const playerInstance = jwplayer("jwplayerDiv");
+</div>
 
-            playerInstance.setup({
-                file: hlsStreamUrl,
-                width: "100%",
-                aspectratio: "16:9",
-                autostart: true,
-                mute: false,
-                skin: {
-                    name: "glow",
-                    active: "#0074d9",
-                    inactive: "#ffffff",
-                    background: "#000000"
-                },
-                type: "hls",
-                preload: "auto"
-            });
+<div class="telegram">
+<a href="https://t.me/rslivetv" target="_blank">
+JOIN OUR TELEGRAM CHANNEL
+</a>
+</div>
 
-            // ফুল-স্ক্রিন রোটেট কন্ট্রোল
-            playerInstance.on('fullscreen', function(event) {
-                if (event.fullscreen) {
-                    // ল্যান্ডস্কেপ মোড করার চেষ্টা করবে
-                    if (screen.orientation && screen.orientation.lock) {
-                        screen.orientation.lock('landscape').catch(err => {
-                            console.log("Orientation lock failed: ", err);
-                        });
-                    }
-                } else {
-                    // ফুল-স্ক্রিন থেকে বের হলে আনলক করবে
-                    if (screen.orientation && screen.orientation.unlock) {
-                        screen.orientation.unlock();
-                    }
-                }
-            });
+<div class="counter">
+<script src="//widget.supercounters.com/ssl/online_t.js"></script>
+<script>
+sc_online_t(1707487,"Users Online","ffffff");
+</script>
+</div>
 
-            playerInstance.on('error', function(error) {
-                document.getElementById('jwplayerDiv').innerHTML = `<div style="padding:40px; text-align:center; background:#000;">প্লেয়ার লোড হতে সমস্যা হচ্ছে। দয়া করে পেজটি রিফ্রেশ করুন।</div>`;
-            });
-        }
+<div class="ad-wrapper">
+<script async data-cfasync="false"
+src="//pl26377079.revenuecpmgate.com/cdeccdd75d3e2e6916a42ce9653cfb08/invoke.js"></script>
+<div id="container-cdeccdd75d3e2e6916a42ce9653cfb08"></div>
+</div>
 
-        // Security
-        document.addEventListener("contextmenu", e => e.preventDefault());
-        document.addEventListener("keydown", e => {
-            if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) || (e.ctrlKey && e.key === "U")) {
-                e.preventDefault();
-            }
-        });
-    </script>
+<script>
 
-    <div class="ad-wrapper">
-        <script async="async" data-cfasync="false" src="//pl26377079.revenuecpmgate.com/cdeccdd75d3e2e6916a42ce9653cfb08/invoke.js"></script>
-        <div id="container-cdeccdd75d3e2e6916a42ce9653cfb08"></div>
-    </div>
+function getParameterByName(name){
+const url=new URL(window.location.href);
+return url.searchParams.get(name);
+}
+
+const stream=getParameterByName("file");
+
+if(!stream){
+
+document.getElementById("loader").style.display="none";
+
+document.getElementById("jwplayerDiv").innerHTML=
+'<div class="error-box">No Stream Found</div>';
+
+}else{
+
+const player=jwplayer("jwplayerDiv");
+
+player.setup({
+file:stream,
+width:"100%",
+aspectratio:"16:9",
+autostart:true,
+mute:false,
+preload:"auto",
+type:"hls"
+});
+
+player.on("ready",function(){
+document.getElementById("loader").style.display="none";
+});
+
+player.on("play",function(){
+document.getElementById("loader").style.display="none";
+});
+
+player.on("buffer",function(){
+document.getElementById("loader").style.display="block";
+});
+
+player.on("error",function(){
+
+document.getElementById("loader").style.display="none";
+
+document.getElementById("jwplayerDiv").innerHTML=
+'<div class="error-box">⚠ Stream Offline<br>Retrying...</div>';
+
+setTimeout(function(){
+location.reload();
+},5000);
+
+});
+
+player.on("fullscreen",function(e){
+
+if(e.fullscreen){
+
+if(screen.orientation &&
+screen.orientation.lock){
+
+screen.orientation.lock("landscape").catch(()=>{});
+
+}
+
+}else{
+
+if(screen.orientation &&
+screen.orientation.unlock){
+
+screen.orientation.unlock();
+
+}
+
+}
+
+});
+
+}
+
+document.addEventListener("contextmenu",e=>{
+e.preventDefault();
+});
+
+</script>
 
 </body>
 </html>
